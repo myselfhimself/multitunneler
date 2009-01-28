@@ -1,0 +1,82 @@
+#summary End-user and developer documentation on the project
+
+=Documentation=
+== Developer documentation ==
+
+===Source code origins===
+This project is a highly modified version of  the `forward.py` example script from the [http://www.lag.net/paramiko/ Python Paramiko library].
+
+On the one hand, the forward.py script allows to setup a single channel through an single SSH tunnel and is configure over command line options.
+
+On the other hand, multi_tunneler allows to have multiple channels through a single SSH tunnel with configuration parsed from a JSON file and login+password hardcodable either in the latter file or in a provided_login_info.py file dedicated just for that.
+
+The forward.py script was licensed under a GPL version. Thus a GPL license has been kept for the multi_tunneler project.
+
+===Source code languages===
+  * [http://www.python.org Python 2.5+] for the .py scripts
+  * [http://www.json.org JSON] for the tunnels_conf.json config file which must stand in the same folder as the python executable
+
+===Libraries===
+The multi_tunneler.py executable needs the following two libraries to work `(1)`:
+  * either of the [http://pypi.python.org/pypi/simplejson simplejson] (version 2.0.7) or [http://docs.python.org/library/json.html json] (builtin and renamed from simplejson from python2.6) python library. This library helps to transform python types (dictionary,lists,strings and integers] from/to JSON string format.
+  * the [http://www.lag.net/paramiko/ Paramiko Python library] in versions higher or lower than 1.7.4. Paramiko is a pure-python, cross-platform, sockets-based SSH2 implementation.
+
+`(1)`note: those two libraries are embedded/ship with every item of the [http://code.google.com/p/multitunneler/wiki/downloads?tm=2 Downloads section] so you don't need to install them.
+
+== End-user documentation ==
+
+===Platforms for running multi_tunneler===
+  * currently Windows and Linux. multi_tunneler can run everywhere where python is installed, just get the source archive, extract it and run edit the code you want.
+  * despite that, emphasis as been put on making the shipped program as whole depend on nothing (not any ssh executable nor a python installation).
+
+
+=== Running the multi_tunneler ===
+
+To run the multi_tunneler application, you must go to its executable's folder and:
+  # modify the tunnels_conf.json file to put your tunneling gate server and desired tunnels information (IP or hostnames and ports...)
+  # optionally, create or edit a provided_login_info.py file to put your login & password for the tunneling gate saver.
+  # execute the `multi_tunneler.py`(needs Python2.5/2.6 installed) or the `multi_tunneler`/`multi_tunneler.exe` executable depending on your platform.
+
+=== Running as root/sudo to kill process occupying ports ===
+On Unix systems only (Linux, MacOS, BSD... Solaris), if you run the multi_tunneler executable with option `-k`, the processes occupying ports that we want to have opened for ourselves will be killed from a root/sudo-/fakeroot account.
+If you are not root, the multi_tunneler will run the kill commands as sudo and you must type a password. 
+
+===Editing the connection options' config files===
+==== tunnels_conf.json ====
+An external JSON file is located in the same folder as the executable.
+
+That file is used to setup of the gate host's hostname and port, destination host's hostname, and correspondance between ports to open locally and ports to reach on destination host.
+
+*_To have detailed help on this .json file's possible fields, just open and take a look at that file's `"help":` fields at the top._*
+
+=== skipping password typing to connect to the gate ===
+To avoid typing your login and password for the gate server at each run, you can edit either of the `provided_login_info.py` or `tunnels_conf.json` files.
+
+====provided_login_info.py login+password module variables====
+Reopen or create a file `provided_login_info.py` in your `multi_tuneler` executable folder with content:
+{{{
+username="gateUsername"
+password="gatePassword"
+}}}
+
+_Note:_ Editing/creating the `provided_login_info.py` file is interesting to make an executable embed and thus "hide" a login+password. Indeed, python "compilers" such as [http://www.py2exe.org/ Py2Exe] and [http://pyinstaller.python-hosting.com/ PyInstaller] most of the time provide the option to embed all imported modules(hence our .py file) into a single executable file.
+
+====tunnels_conf.json login+password fields====
+Alternatively from before, a login and password can added into the JSON file's gate's dictionary structure:
+{{{
+[...]
+"gate": {
+    "hostname":"someIpOrHostname.com",
+    "port":AnInteger,
+    "username":"gateUsername",
+    "password":"gatePassword"
+    },
+[...]
+}}}
+
+
+
+==Known issues==
+When the executable is run from a remote folder than the it is located in (ie. `./../../multi_tunneler`), it tries to open the .json in the path you are calling from and thus does not find it. This can be fixed in code easily.
+
+For now, a workaround is to always execute the file its current folder.
