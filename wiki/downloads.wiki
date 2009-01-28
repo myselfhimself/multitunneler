@@ -1,0 +1,17 @@
+#summary Available downloads (source & binaries) for the multitunneler application
+
+=Downloads=
+The executables in the archive require nothing to run properly except your usual system libaries which you must have anyway.
+|| Platform || Authentifies to gate for you || Does not authentify to gate for you || Date uploaded ||
+|| Windows  || [http://multitunneler.googlecode.com/files/multi_tunneler_EmbeddedLogin.zip multi_tunneler_EmbeddedLogin.zip]|| [http://multitunneler.googlecode.com/files/multi_tunneler_NoLogin.zip multi_tunneler_NoLogin.zip] || Jan 26 2009 ||
+|| Linux || [http://multitunneler.googlecode.com/files/multi_tunneler_EmbeddedLogin.tar.gz multi_tunneler_EmbeddedLogin.tar.gz]||[http://multitunneler.googlecode.com/files/multi_tunneler_NoLogin.tar.gz multi_tunneler_NoLogin.tar.gz] || Jan 26 2009 ||
+|| Source || [http://multitunneler.googlecode.com/files/multi_tunneler_source.tar.gz multi_tunneler_source.tar.gz] || -  || Jan 26 2009 ||
+
+==Libraries used==
+The releases above rely and contain the python modules: [http://www.lag.net/paramiko/ Paramiko] 1.7.4 and [http://pypi.python.org/pypi/simplejson simplejson 2.0.7].
+
+==How Python files were packaged==
+
+The Windows binary executables were packaged with [http://www.py2exe.org/ Py2Exe] and the Linux ones with [http://pyinstaller.python-hosting.com/ PyInstaller].
+
+Builds-generating script files for that are included within the [http://multitunneler.googlecode.com/files/multi_tunneler_source.tar.gz source archive].
