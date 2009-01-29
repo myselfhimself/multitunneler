@@ -1,6 +1,5 @@
 #summary Available downloads (source & binaries) for the multitunneler application
-[http://code.google.com/p/multitunneler/w/edit/downloads Edit this page]
-
+[http://code.google.com/p/multitunneler/w/edit/downloads Edit this page] | [http://code.google.com/p/multitunneler/downloads/list Show the default list view with all downloads]
 =Downloads=
 The executables in the archive require nothing to run properly except your usual system libaries which you must have anyway.
 || Platform || Authentifies to gate for you || Does not authentify to gate for you || Date uploaded ||
