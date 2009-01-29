@@ -1,0 +1,25 @@
+{
+    "help":
+	{
+	    "formatting": "This file exactly uses the JSON syntax (JS=JavaScript). If you have JSON syntax errors when running the multi_tunneler, copy paste this file's content in what is called an online 'JSON validator' (Googling for that gives many results))",
+	    "portmappings": "Sip is Asterisk SIP, http is for web browsing, ssh is for ssh,svn+ssh and sftp, mysql is to access the running mysql server",
+	    "gate": "The gateway server from which to connect first and who will tunnel us. This dictionary may have two fields name 'login':string and 'password':string. If either is omitted, it will be asked in command line. If 'port':int field is omitted, 22 is assumed.",
+	    "destination" : "The destination server we want to reach through the gateway tunnel. If the value of 'hostname' is a dictionary with a key named 'fromweb', the hostname to use is the first line retrieved from the web page whose address is the 'fromweb' key's string value."
+	},
+    "gate":
+	{
+	    "hostname":"gandalf.ece.fr",
+	    "port":22
+	},
+    "destination":
+	{
+	    "hostname": {"fromweb":"http://www.ece.fr/~schroder/audiospreadIP"}
+	},
+    "portmappings":
+	[
+	    {"name": "http", "localport":10001, "destinationport":80},
+	    {"name": "sip", "localport": 10002, "destinationport":5060},
+	    {"name": "ssh","localport":22, "destinationport":22},
+	    {"name": "mysql","localport":10004,"destinationport":3306}
+	]
+}
