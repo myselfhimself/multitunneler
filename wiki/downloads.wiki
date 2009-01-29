@@ -1,4 +1,5 @@
 #summary Available downloads (source & binaries) for the multitunneler application
+[http://code.google.com/p/multitunneler/w/edit/downloads Edit this page]
 
 =Downloads=
 The executables in the archive require nothing to run properly except your usual system libaries which you must have anyway.
