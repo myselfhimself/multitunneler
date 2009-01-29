@@ -15,4 +15,4 @@ The releases above rely and contain the python modules: [http://www.lag.net/para
 
 The Windows binary executables were packaged with [http://www.py2exe.org/ Py2Exe] and the Linux ones with [http://pyinstaller.python-hosting.com/ PyInstaller].
 
-Builds-generating script files for that are included within the [http://multitunneler.googlecode.com/files/multi_tunneler_source.tar.gz source archive].
+The "Full" build suite contains both the Windows and Unixes build scripts used for those "compiling" operations.
