@@ -1,4 +1,5 @@
 #summary End-user and developer documentation on the project
+#labels Featured
 [http://code.google.com/p/multitunneler/w/edit/thewiki Edit this page]
 
 =Documentation=
