@@ -1,5 +1,5 @@
 #summary End-user and developer documentation on the project
-[http://code.google.com/p/multitunneler/w/edit/thewiki Edit this page] | [http://code.google.com/p/multitunneler/downloads/list View downloads default list]
+[http://code.google.com/p/multitunneler/w/edit/thewiki Edit this page]
 
 =Documentation=
 == Developer documentation ==
@@ -38,11 +38,11 @@ To run the multi_tunneler application, you must go to its executable's folder an
   # optionally, create or edit a provided_login_info.py file to put your login & password for the tunneling gate saver.
   # execute the `multi_tunneler.py`(needs Python2.5/2.6 installed) or the `multi_tunneler`/`multi_tunneler.exe` executable depending on your platform.
 
-=== Running as root/sudo to kill process occupying ports ===
+=== Unixes only - Running as root/sudo to kill process occupying ports ===
 On Unix systems only (Linux, MacOS, BSD... Solaris), if you run the multi_tunneler executable with option `-k`, the processes occupying ports that we want to have opened for ourselves will be killed from a root/sudo-/fakeroot account.
 If you are not root, the multi_tunneler will run the kill commands as sudo and you must type a password. 
 
-===Editing the connection options' config files===
+===Editing the 2 connection options' configuration files===
 ==== tunnels_conf.json ====
 An external JSON file is located in the same folder as the executable.
 
@@ -78,6 +78,15 @@ Alternatively from before, a login and password can added into the JSON file's g
 
 
 ==Known issues==
-When the executable is run from a remote folder than the it is located in (ie. `./../../multi_tunneler`), it tries to open the .json in the path you are calling from and thus does not find it. This can be fixed in code easily.
+===Running from a different folder===
+When executed from a different folder as the one it is located in, the multi_tunneler(.py) executable _may not be able to load the_ tunnels_conf.json nor the provided_login_info.py _configuration files_ from its folder.
 
-For now, a workaround is to always execute the file its current folder.
+As a workaround, make sure you actually goto in the executable's folder first before running it.
+
+=Support=
+If you encounter any issue with the project's contents, please report it to us:
+  * by email at `inter_team_ppe_2008 @t googlegroups.com`
+or
+  * by filing an issue in the [http://code.google.com/p/multitunneler/issues/list Issues section] of this website.
+
+More generally, you can contact us at `inter_team_ppe_2008 @t googlegroups.com`.
