@@ -1,0 +1,10 @@
+./googlecode_upload.py -s Linux32multi_tunnelerNoLogin -l Type-Executable -p multitunneler Archives/Linux32multi_tunnelerNoLogin.tar.gz
+
+./googlecode_upload.py -s Linux32multi_tunnelerEmbeddedLogin -l Type-Executable -p multitunneler Archives/Linux32multi_tunnelerEmbeddedLogin.tar.gz
+
+./googlecode_upload.py -s multi_tunnelerSourceWithLibsAndBuildTools -l Type-Source -p multitunneler Archives/multi_tunnelerSourceWithLibsAndBuildTools.tar.gz
+
+./googlecode_upload.py -s multi_tunnelerSourceWithLibs -l Type-Source -p multitunneler Archives/multi_tunnelerSourceWithLibs.tar.gz
+
+./googlecode_upload.py -s multi_tunnelerSource -p multitunneler Archives/multi_tunnelerSource.tar.gz
+
