@@ -84,9 +84,8 @@ When executed from a different folder as the one it is located in, the multi_tun
 As a workaround, make sure you actually goto in the executable's folder first before running it.
 
 =Support=
-If you encounter any issue with the project's contents, please report it to us:
-  * by email at `inter_team_ppe_2008 @t googlegroups.com`
-or
+If you encounter any issue with the project's contents, please report it to us either:
+  * by sending us an email at `inter_team_ppe_2008 @t googlegroups.com`
   * by filing an issue in the [http://code.google.com/p/multitunneler/issues/list Issues section] of this website.
 
 More generally, you can contact us at `inter_team_ppe_2008 @t googlegroups.com`.
