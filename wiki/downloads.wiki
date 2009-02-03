@@ -6,8 +6,10 @@ The executables in the archive require nothing to run properly except your usual
 || Platform || Authentifies to gate for you || Does not authentify to gate for you || Date uploaded ||
 || Windows  || [http://multitunneler.googlecode.com/files/# Win32multi_tunnelerEmbeddedLogin.zip(not uploaded)]|| [http://multitunneler.googlecode.com/files/Win32multi_tunnelerNoLogin.zip Win32multi_tunnelerNoLogin.zip] || Jan 29 2009 ||
 || Linux || [http://multitunneler.googlecode.com/files/Linux32multi_tunnelerEmbeddedLogin.tar.gz Linux32multi_tunnelerEmbeddedLogin.tar.gz(not uploaded)]||[http://multitunneler.googlecode.com/files/Linux32multi_tunnelerNoLogin.tar.gz Linux32multi_tunnelerNoLogin.tar.gz] || Jan 29 2009 ||
-|| Source || [http://multitunneler.googlecode.com/files/multi_tunnelerSource.tar.gz multi_tunnelerSource.tar.gz] || [http://multitunneler.googlecode.com/files/multi_tunnelerSourceWithLibs.tar.gz multi_tunnelerSourceWithLibs.tar.gz]  || Jan 29 2009 ||
-|| "Full" build suite || [http://multitunneler.googlecode.com/files/multi_tunnelerSourceWithLibsAndBuildTools.tar.gz multi_tunnelerSourceWithLibsAndBuildTools.tar.gz]|| - || Jan 29 2009 ||
+|| Source || [http://multitunneler.googlecode.com/files/multi_tunnelerSource.tar.gz multi_tunnelerSource.tar.gz] || [http://multitunneler.googlecode.com/files/multi_tunnelerSourceWithLibs.tar.gz multi_tunnelerSourceWithLibs.tar.gz]*(1)*  || Jan 29 2009 ||
+|| "Full" build suite || [http://multitunneler.googlecode.com/files/multi_tunnelerSourceWithLibsAndBuildTools.tar.gz multi_tunnelerSourceWithLibsAndBuildTools.tar.gz] *(1)*|| - || Jan 29 2009 ||
+
+*(1)* If you have errors with the Crypto. library, make sure you have installed the python-crypto package (was not preinstalled on Ubuntu Linux 8.10 Intrepid).
 
 ==Libraries used==
 The releases above rely and contain the python modules: [http://www.lag.net/paramiko/ Paramiko] 1.7.4 and [http://pypi.python.org/pypi/simplejson simplejson 2.0.7].
