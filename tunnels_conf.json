@@ -8,18 +8,19 @@
 	},
     "gate":
 	{
-	    "hostname":"gandalf.ece.fr",
+	    "hostname":"someHostName",
 	    "port":22
 	},
     "destination":
 	{
-	    "hostname": {"fromweb":"http://www.ece.fr/~schroder/audiospreadIP"}
+	    "hostname": {"fromweb":"someWebPageWithIPOnFirstLine"}
 	},
     "portmappings":
-	[
-	    {"name": "http", "localport":10001, "destinationport":80},
-	    {"name": "sip", "localport": 10002, "destinationport":5060},
-	    {"name": "ssh","localport":22, "destinationport":22},
-	    {"name": "mysql","localport":10004,"destinationport":3306}
-	]
+	{
+	    "http" :{ "localport":10001, "destinationport":80},
+	    "sip" :{"localport": 10002, "destinationport":5060},
+	    "ssh" : {"localport":22, "destinationport":22},
+	    "mysql":{"localport":10004,"destinationport":3306},
+	    "IAX2udp/tcp":{"localport":10005,"destinationport":443,"udplocalport":4569}
+	}
 }

@@ -29,26 +29,32 @@ connection to a destination reachable from the SSH server machine.
 
 import getpass
 import os
+import platform
 import socket
 import select
 import SocketServer
 import sys,commands,thread,time
-import tunnels_conf_reader #test to see if Py2Exe wants that
 from tunnels_conf_reader import getJSONSettings
+from subprocess import Popen
+import signal #for SIGTERM constant in atexit callback
+from copy import copy
 
 import paramiko #portable full ssh2 implementation based on sockets
 import paramiko.pipe #for cx_freeze to work when packaging
 
 successfullyMappedPorts = {}
 g_verbose = True # global
+socatProcesses = [] #global
+
+def isUnixPlatform():
+    plat = platform.system().lower()
+    l = ("linux","darwin","bsd","sunos","solaris")
+    return any([a in plat for a in l])
 
 #-------parameters parsing--------
 ENABLE_UNIX_PORTUSER_KILLING = "-k" in sys.argv #global # provokes use of fuser -k to free local used ports before binding to them
 if ENABLE_UNIX_PORTUSER_KILLING:
-    import platform
-    plat = platform.system().lower()
-    l = ("linux","darwin","bsd","sunos","solaris")
-    if not any([a in plat for a in l]):
+    if not isUnixPlatform():
 	print "you don't seem to be on a unix-like system, the -k option may not work."
 	answer = raw_input("(d)isable this option and continue? continue (w)ithout disabling? or (q)uit now? [d/w/Q]").lower().strip()
 	if answer == "w":
@@ -107,9 +113,44 @@ class Handler (SocketServer.BaseRequestHandler):
         self.request.close()
         verbose('Tunnel closed from %r' % (self.request.getpeername(),))
 
+#returns True/False on socat running success/failure
+def udp_to_tcp_realtime_conversion(udp_listen_port,tcp_redirect_port,canRetry=True):
+    global socatProcesses
+    global ENABLE_UNIX_PORTUSER_KILLING
+    print "starting udp=>tcp conversion daemon(socat) for localhost:%d/udp to localhost:%d/tcp" % (udp_listen_port,tcp_redirect_port)
+    from commands import getoutput
+    success = False
+    if isUnixPlatform(): #unix
+	socatCmd = getoutput("which socat").strip()
+	if not socatCmd:
+	    print "socat isn't installed on this platform or which cannot find it. Please install it first."
+	    success = False
+	else:
+	    success = True
+    else: #windows
+	socatCmd = "socat.exe"
+	if not os.path.exists(socatCmd):
+	    print socatCmd,"is not in the executable's path:",os.getcwd()
+	    success = False
+	else:
+	    success = True
+    if success:
+	print "socat executable found on this computer at %s. Running it." % socatCmd
+	a,b = copy(udp_listen_port),copy(tcp_redirect_port) #there's race issue here maybe
+	args = ("%s udp4-listen:%s,reuseaddr,fork tcp:localhost:%s" % (socatCmd,a,b)).split()
+	i = Popen(args)
+	#if socat has stopped right away, there must have been a problem
+	time.sleep(1)
+	if i.poll() is not None:
+	    success = False #anyway socat will have printed something to stdout
+	else:
+	    socatProcesses.append(i)
+    return success
 
-def forward_tunnel(mapping_name,local_port, remote_host, remote_port, transport):
+def forward_tunnel(mapping_name,local_port, remote_host, remote_port, transport,udp_listen_port=None):
     global successfullyMappedPorts
+    doUdp = udp_listen_port is not None
+    success = udpSuccess = False
     # this is a little convoluted, but lets me configure things for the Handler
     # object.  (SocketServer doesn't give Handlers any way to access the outer
     # server normally.)
@@ -117,47 +158,68 @@ def forward_tunnel(mapping_name,local_port, remote_host, remote_port, transport)
         chain_host = remote_host
         chain_port = remote_port
         ssh_transport = transport
-    mapping_descr_str = "%s:\tlocalhost:\t%d\t=>\t%s:%d" % (mapping_name,local_port,remote_host,remote_port)
+    mapping_descr_str = "%-13slocalhost:%d/tcp\t=>\t%s:%d/tcp" % (mapping_name+":",local_port,remote_host,remote_port) + ((" & localhost:%d/udp\t=>\tlocalhost:%d/tcp" % (udp_listen_port,local_port)) if doUdp else "")
     print "establishing connection through tunnel:",mapping_descr_str
     try:
-	successfullyMappedPorts[mapping_name] = mapping_descr_str
-	ForwardServer(('', local_port), SubHander).serve_forever()
+	FS = ForwardServer(('', local_port), SubHander)
+	thread.start_new_thread(FS.serve_forever,())
+	success = True
     except Exception,e:
 	print e,"your OS doesn't want you to bind to %s. All other ports should work though." % (local_port,)
 	print "...Rerun this program as root/administrator user if you really need port %s." % (local_port,)
 	if not ENABLE_UNIX_PORTUSER_KILLING and local_port >= 1024:
-	    print "...This port is >= 1024, if you are on a Unix system, rerun with option -k."
-	successfullyMappedPorts.pop(mapping_name)
-
+	    print "...This port is already in use or is >= 1024, if you are on a Unix system, rerun with option -k."
+	success = False
+    else: #if no problem in the first FS.serve_forever <=> SSH channel just run raised no exception
+	#then run udp conversion if requested
+	if success and doUdp:
+	    if type(udp_listen_port) is int and udp_listen_port > 0:
+		try:
+		    udpSuccess = udp_to_tcp_realtime_conversion(udp_listen_port,local_port)
+		except Exception,e:
+		    udpSuccess = False
+		if not udpSuccess:
+		    print "couldn't start udp conversion for udp/localhost:%s to tcp/localhost:%s" % (udp_listen_port,local_port)
+		    print "Kill a process listening to port %s or change your configuration file's UDP settings, and rerun this program." % udp_listen_port
+	    else:
+		print "udp_listen_port:",udp_listen_port,"must be an int > 0. Not doing UDP packets conversion..."
+		print "Another process (another socat?) is running and listening to the same port %s that we want. Kill that process or change your configuration file's UDP port settings and rerun this program." % udp_listen_port
+		udpSuccess = False
+    if success:
+	successfullyMappedPorts[mapping_name] = mapping_descr_str if ((doUdp and udpSuccess) or not doUdp) else (mapping_descr_str.split('&')[0].strip()+ "\t<- Could not start UDP=>TCP converter daemon !")
 
 def verbose(s):
     if g_verbose:
         print s
+
+def freePort(port,tcpOrUdpStr="tcp"):
+    groups = commands.getoutput("groups").strip().split()
+    isroot = "root" in groups
+    runasroot = lambda aCommandString : commands.getoutput(("sudo" if not isroot else "")+ " "+aCommandString).strip()
+    print "trying to see if port-freeing is needed for %s/%s." % (port,tcpOrUdpStr)
+    l = runasroot("fuser %s/%s" % (port,tcpOrUdpStr))
+    if l: #if there was some user of the the port
+	print l+". Port",port,"is in use. Trying to free it."
+	l = runasroot("fuser -k %s/%s" % (port,tcpOrUdpStr))
+	l = runasroot("fuser %s/%s" % (port,tcpOrUdpStr))
+	if not l:
+	    print "Occupying programm was killed."
+	else:
+	    print l,"Couldn't kill occupying program."
+    else:
+	print "Port %s/%s was free. Not freeing." % (port,tcpOrUdpStr)
 
 def makeThreads(destination,portmappings,transportObject):
     global ENABLE_UNIX_PORTUSER_KILLING
     parameters = []
     if ENABLE_UNIX_PORTUSER_KILLING:
 	print "ports freeing is enabled."
-	groups = commands.getoutput("groups").strip().split()
-	isroot = "root" in groups
-	runasroot = lambda aCommandString : commands.getoutput(("sudo" if not isroot else "")+ " "+aCommandString).strip()
-	    
-    for mapping in portmappings:
+    for mappingName,mapping in zip(portmappings,portmappings.values()):
 	if ENABLE_UNIX_PORTUSER_KILLING:
-	    print "trying to see if port-freeing is needed for",mapping
-	    l = runasroot("fuser %s/tcp" % (mapping["localport"],))
-	    if l: #if there was some user of the the port
-		print l+". Port",mapping["localport"],"is in use. Trying to free it."
-		l = runasroot("fuser -k %s/tcp" % (mapping["localport"],))
-		l = runasroot("fuser %s/tcp" % (mapping["localport"],))
-		if not l:
-		    print "Occupying programm was killed."
-		else:
-		    print l,"Couldn't kill occupying program."
-	    else:
-		print "Port",mapping["localport"],"was free. Not freeing."
-        parameters.append((mapping["name"],mapping["localport"],destination,mapping["destinationport"],transportObject)) #adding fct paremeters to passed to forward_tunnel later in one shot
+	    freePort(mapping["localport"])
+	    if "udplocalport" in mapping:
+		freePort(mapping["udplocalport"],"udp")
+        parameters.append((mappingName,mapping["localport"],destination,mapping["destinationport"],transportObject)+ ((mapping["udplocalport"],) if "udplocalport" in mapping else ())) #adding fct paremeters to passed to forward_tunnel later in one shot
     #running all tunnels as threads in one shot
     for p in parameters:
 	thread.start_new_thread(forward_tunnel,p) #returns a thread id or(?) handle but we don't care
@@ -168,7 +230,7 @@ def makeThreads(destination,portmappings,transportObject):
     while q.strip() != "q":
 	print "Ports tunneled and active are:"
 	for l in successfullyMappedPorts.values(): print l
-	q = raw_input("Press q to close all connections and kill this process: ") #daemon behaviour
+	q = raw_input("Press q to close all connections and kill this process:\n>") #daemon behaviour
     sys.exit(0)
 
 def main():
@@ -176,7 +238,7 @@ def main():
     gate,destination,portmappings = settings["gate"],settings["destination"],settings["portmappings"]
 
     #get username and password from user if not provided
-    username = raw_input("Enter login for "+gate["hostname"]+":") if "login" not in gate else gate["login"]
+    username = raw_input("Enter username for "+gate["hostname"]+":") if "username" not in gate else gate["username"]
     password = getpass.getpass('Enter SSH password: ') if "password" not in gate else gate["password"]
 
     client = paramiko.SSHClient()
@@ -189,7 +251,7 @@ def main():
         client.connect(gate["hostname"], gate["port"], username=username,password=password)
     except Exception, e:
         print '*** Failed to connect to %s:%d: %r.' % (gate["hostname"], gate["port"], e)
-	print "Is one of the provided login and password not correct?"
+	print "Maybe your either of the provided username or password is not correct?"
         sys.exit(1)
 
     #verbose('Now forwarding port %d to %s:%d ...' % (options.port, remote[0], remote[1]))
@@ -200,8 +262,45 @@ def main():
 	makeThreads(destination["hostname"],portmappings,client.get_transport())
         #forward_tunnel(options.port, remote[0], remote[1], )
     except KeyboardInterrupt:
-        print 'C-c: Port forwarding stopped.'
+        print 'Control-C: Port forwarding stopped.'
         sys.exit(0)
 
+def py25kill(popenObject):
+    pid = popenObject.pid
+    if isUnixPlatform():
+	#unix only:
+	
+	os.kill(popenObject.pid,signal.SIGTERM)
+	return pid
+    else:
+	try:
+	    import win32api
+	except:
+	    print "don't know how to kill processes with python2.5 on windows without using win32api which you don't see to have installed. Take Python2.6+ !"
+	    return False
+	else:
+	    win32api.TerminateProcess(pid,0)
+	    return pid
+	
+
+def py26kill(popenObject):
+    pid = popenObject.pid
+    popenObject.terminate() # windows & unix
+    return pid
+
+def killSubProcesses():
+    global socatProcesses
+    print ("killing %s socat processes:" % len(socatProcesses)) if socatProcesses else "no children socat processes to kill."
+    version = float(sys.version[:3])
+    killFct = py25kill if version < 2.6 else py26kill
+    for popenObject in socatProcesses:
+	pid = killFct(popenObject)
+	if pid:
+	    print " - killed socat with pid: "+str(pid) if pid else " - couldn't kill one children socat instance due to python limitation on this platform."
+    print "Done."
+
 if __name__ == '__main__':
+    import atexit
+    atexit.register(killSubProcesses)
     main()
+    
