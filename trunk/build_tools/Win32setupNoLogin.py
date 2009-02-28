@@ -17,3 +17,4 @@ setup(
     zipfile=None)
 
 system("copy tunnels_conf.json "+dir)
+system("copy socat-1.6.0.0\\* "+dir)
