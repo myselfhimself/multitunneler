@@ -41,8 +41,10 @@ print "done building executable for Win32multitunnelerEmbeddedLogin target."
 yN=raw_input("do you want to test run the executable now? [y/N*]").strip().lower()
 print "cd %s; %s; cd .." % (dirEmbedded,executableName)
 if yN == 'y': system("cd %s & %s & cd .." % (dirEmbedded,executableName))
+system("rename tunnels_overriding_conf.py tunnels_overriding_conf.pyAA") #this may not work if file is not there but that's not a problem..
 system("%s %s py2exe" % (python,setupNoLogin))
 system("rd  build") #remove the build/ folder where all intermediate built files are stored
+system("rename tunnels_overriding_conf.pyAA tunnels_overriding_conf.py") #this may not work if file is not there but that's not a problem..
 print "done building executable for Win32multitunnelerNoLogin target."
 yN=raw_input("do you want to test run the executable now? [y/N*]").strip().lower()
 if yN == 'y': system("cd %s & %s & cd .." % (dirNoLogin,executableName))

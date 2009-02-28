@@ -29,7 +29,7 @@ else: isunix=True
 #system("sh cleanCompiledObjectsNow.sh")
 #system("python Linux32makeEmbeddedAndNoLogin.py")
 folderPrefs=("Win32","Linux32")
-folderSufs=("multi_tunnelerEmbeddedLogin","multi_tunnelerNoLogin")
+folderSufs=("multitunnelerEmbeddedLogin","multitunnelerNoLogin")
 #create folder to store archives into it, if it doesn't exist yet
 outdir="Archives"
 if outdir not in listdir(getcwd()):
@@ -67,21 +67,21 @@ def makeSourceArchive(filelist,dirlist,fileprefix):
 	archivesdone.append(name)
 
 print "========== simple source archive without libraries =========="
-filelist = ("multi_tunneler.py","tunnels_conf.json","tunnels_conf_reader.py","provided_login_info.py")
+filelist = ("multitunneler.py","tunnels_conf.json","tunnels_conf_reader.py","tunnels_overriding_conf.py")
 dirlist= () 
-fileprefix = "multi_tunnelerSource"
+fileprefix = "multitunnelerSource"
 makeSourceArchive(filelist,dirlist,fileprefix)
 
 print "========== source archive with libraries =========="
-filelist = ("multi_tunneler.py","tunnels_conf.json","tunnels_conf_reader.py","provided_login_info.py")
+filelist = ("multitunneler.py","tunnels_conf.json","tunnels_conf_reader.py","tunnels_overriding_conf.py")
 dirlist= ("simplejson","paramiko")
-fileprefix = "multi_tunnelerSourceWithLibs"
+fileprefix = "multitunnelerSourceWithLibs"
 makeSourceArchive(filelist,dirlist,fileprefix)
 
 print "========== source archive with libraries and build tools =========="
 filelist = ("*.py","*.sh","*.json")
 dirlist= ("simplejson","paramiko","build_tools","pyinstaller-1.3") #will build on Unices without any additional dependencies, and on Windows with py2exe installed (we have chosen pyinstaller-1.3 to take py2exe's place on linux)
-fileprefix = "multi_tunnelerSourceWithLibsAndBuildTools"
+fileprefix = "multitunnelerSourceWithLibsAndBuildTools"
 makeSourceArchive(filelist,dirlist,fileprefix)
 
 print "====== conclusion ======="
