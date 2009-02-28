@@ -32,18 +32,18 @@ possiblePythonInstDir = possiblePythonInstDir[:possiblePythonInstDir.find('\\',p
 python = path.join(possiblePythonInstDir,"python.exe") # like "C:\Python26\python.exe"
 setupEmbedded = '"'+path.join(build_tools_path,"Win32setupEmbeddedLogin.py")+'"'
 setupNoLogin = '"'+path.join(build_tools_path,"Win32setupNoLogin.py")+'"'
-executableName = "multi_tunneler.exe"
-dirEmbedded = "Win32multi_tunnelerEmbeddedLogin"
-dirNoLogin = "Win32multi_tunnelerNoLogin"
+executableName = "multitunneler.exe"
+dirEmbedded = "Win32multitunnelerEmbeddedLogin"
+dirNoLogin = "Win32multitunnelerNoLogin"
 system("%s %s py2exe" % (python,setupEmbedded))
-system("rm -rf build") #remove the build/ folder where all intermediate built files are stored
-print "done building executable for Win32multi_tunnelerEmbeddedLogin target."
+system("rd build") #remove the build/ folder where all intermediate built files are stored
+print "done building executable for Win32multitunnelerEmbeddedLogin target."
 yN=raw_input("do you want to test run the executable now? [y/N*]").strip().lower()
 print "cd %s; %s; cd .." % (dirEmbedded,executableName)
 if yN == 'y': system("cd %s & %s & cd .." % (dirEmbedded,executableName))
 system("%s %s py2exe" % (python,setupNoLogin))
-system("rm -rf build") #remove the build/ folder where all intermediate built files are stored
-print "done building executable for Win32multi_tunnelerNoLogin target."
+system("rd  build") #remove the build/ folder where all intermediate built files are stored
+print "done building executable for Win32multitunnelerNoLogin target."
 yN=raw_input("do you want to test run the executable now? [y/N*]").strip().lower()
 if yN == 'y': system("cd %s & %s & cd .." % (dirNoLogin,executableName))
 raw_input("Building done, press any key to continue...")
