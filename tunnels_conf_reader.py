@@ -71,19 +71,27 @@ def getJSONSettings():
     #interpret "fromweb" field if presentfor server IP retrieval
     #	the settings["destination"]["hostname"] field is replaced with an IP address/hostname
     destHostname = settings["destination"]["hostname"]
-    if type(destHostname) is dict and destHostname.has_key("fromweb"):
-	try: 
-	    u = destHostname["fromweb"]
-	    up = urllib.urlopen(u)
-	except Exception,e:
-	    print e,"could connect to:",u
-	    sys.exit(1)
-	settings["destination"]["hostname"] = up.readlines()[0].strip()
-	up.close()
-    else:
-	print "if destination.hostname is a dictionary, it must have \"fromweb\" key-value pair. None found."
-	print "Exiting."
-	sys.exit(1)
+    if type(destHostname) is dict: 
+    	if destHostname.has_key("fromweb"):
+		try: 
+		    u = destHostname["fromweb"]
+		    up = urllib.urlopen(u)
+		except Exception,e:
+		    print e,"could connect to:",u
+		    sys.exit(1)
+		settings["destination"]["hostname"] = up.readlines()[0].strip()
+		up.close()
+	else:
+		print "ok destination.hostname is a dictionary, though I can't find any \"fromweb\" key-value pair in it.\nExiting."
+		sys.exit(1)
+    else: #if destHostname is not a dict
+	    try:
+		    destHostname = str(destHostname)
+	    except:
+		    print "destination.hostname must be some kind of a string.\nExiting."
+		    sys.exit(1)
+	    else:
+		    pass #it's ok we have a string for the host, that's what we want in the end
 	
     if "port" not in settings["gate"]:
 	settings["gate"]["port"] = 22
